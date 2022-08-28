@@ -1,0 +1,4 @@
+package method
+
+interface RpcMethod {
+}
