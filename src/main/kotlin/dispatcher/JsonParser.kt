@@ -4,7 +4,7 @@ interface JsonParser {
     fun readTree(json: String): JsonHolder?
 }
 
-interface JsonHolder {
+interface JsonHolder : Iterable<JsonHolder> {
     fun isArray(): Boolean
 
     fun isEmpty(): Boolean
