@@ -1,8 +1,16 @@
 package dispatcher
 
 import com.fasterxml.jackson.databind.JsonNode
+import util.getMapper
 
 class JacksonParser(private val node: JsonNode) : JsonHolder {
+
+    companion object : JsonParser {
+        override fun readTree(json: String): JsonHolder? {
+            val readTree = getMapper().readTree(json) ?: return null
+            return JacksonParser(readTree)
+        }
+    }
 
     override fun iterator(): Iterator<JsonHolder> {
         TODO("Not yet implemented")
