@@ -26,11 +26,6 @@ class MainTest {
     }
 
     @Test
-    fun deserializeTest() {
-        Json.decodeFromString<RequestImpl<Any?>>(jsonWithIdNoparams)
-    }
-
-    @Test
     fun jacksonMapperTest() {
         val mapper = jacksonObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)

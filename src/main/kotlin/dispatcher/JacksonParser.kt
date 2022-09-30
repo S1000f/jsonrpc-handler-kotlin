@@ -25,7 +25,7 @@ class JacksonParser(private val node: JsonNode) : JsonHolder {
     }
 
     override fun findValue(fieldName: String): JsonHolder? {
-        return node.findValue(fieldName)
+        TODO()
     }
 
     override fun isIntegralNumber(): Boolean {
