@@ -4,6 +4,7 @@ import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import util.Helpers
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MainTest {
@@ -75,12 +76,31 @@ class MainTest {
 
         val paramOne = readValue as ParamOne
 
-
-
+        println(paramOne)
     }
 
     fun getParamsClass(): Class<*> {
         return ParamOne::class.java
+    }
+
+    @Test
+    fun test() {
+        val json = """
+            [1, 2, 4]
+        """.trimIndent()
+
+        val clazz = List::class.java
+
+        val dese = dese(json, clazz)
+        println(dese)
+
+        val intList = dese as List<Int>
+        println(intList)
+    }
+
+    inline fun <reified T> dese(json: String, type: Class<T>): T {
+        val readValue = Helpers.getMapper().readValue(json, type)
+        return type.cast(readValue)
     }
 
 }

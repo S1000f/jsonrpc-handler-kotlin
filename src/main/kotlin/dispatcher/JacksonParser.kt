@@ -1,19 +1,22 @@
 package dispatcher
 
 import com.fasterxml.jackson.databind.JsonNode
-import util.getMapper
+import util.Helpers
 
-class JacksonParser(private val node: JsonNode) : JsonHolder {
+class JacksonParser private constructor(private val node: JsonNode) : JsonHolder {
 
     companion object : JsonParser {
-        override fun readTree(json: String): JsonHolder? {
-            val readTree = getMapper().readTree(json) ?: return null
-            return JacksonParser(readTree)
+        override fun readTree(json: String): JsonHolder {
+            return JacksonParser(Helpers.getMapper().readTree(json))
         }
     }
 
     override fun iterator(): Iterator<JsonHolder> {
-        TODO("Not yet implemented")
+        val iterator = node.iterator()
+
+        return iterator.asSequence()
+            .map { JacksonParser(it) }
+            .iterator()
     }
 
     override fun isArray(): Boolean {
@@ -25,26 +28,31 @@ class JacksonParser(private val node: JsonNode) : JsonHolder {
     }
 
     override fun findValue(fieldName: String): JsonHolder? {
-        return node.findValue(fieldName)
+        val jsonNode = node.findValue(fieldName) ?: return null
+        return JacksonParser(jsonNode)
     }
 
     override fun isIntegralNumber(): Boolean {
-        TODO("Not yet implemented")
+        return node.isIntegralNumber
     }
 
     override fun isTextual(): Boolean {
-        TODO("Not yet implemented")
+        return node.isTextual
     }
 
     override fun isNull(): Boolean {
-        TODO("Not yet implemented")
+        return node.isNull
     }
 
     override fun asText(): String {
-        TODO("Not yet implemented")
+        return node.asText()
     }
 
     override fun textValue(): String? {
-        TODO("Not yet implemented")
+        return node.textValue()
+    }
+
+    override fun toString(): String {
+        return node.toString()
     }
 }
