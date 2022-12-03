@@ -5,6 +5,7 @@ import org.junit.jupiter.api.TestInstance
 import util.Helpers
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -60,6 +61,31 @@ class JacksonParserTest {
 
         assertTrue(JacksonParser.readTree(json).isEmpty())
         assertTrue(JacksonParser.readTree(json1).isEmpty())
+    }
+
+    @Test
+    fun isIntegralNumberTest() {
+        val json = """
+            {"num":33}
+        """.trimIndent()
+
+        val json1 = """
+            {"str":"strings"}
+        """.trimIndent()
+
+        JacksonParser.readTree(json)
+            .findValue("num")
+            .let {
+                assertNotNull(it)
+                assertTrue(it.isIntegralNumber())
+            }
+
+        JacksonParser.readTree(json1)
+            .findValue("str")
+            .let {
+                assertNotNull(it)
+                assertFalse(it.isIntegralNumber())
+            }
     }
 
     @Test
