@@ -2,8 +2,8 @@ package dispatcher
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import org.junit.jupiter.api.assertAll
+import kotlin.test.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ContextBuilderTest {
@@ -17,12 +17,21 @@ class ContextBuilderTest {
         val jsonNode = JacksonParser.readTree(_jsonEmptyArray)
         val spec = Specification.V2_0
 
-        val build = spec.build(jsonNode)
+        val build = spec.builder(jsonNode)
 
-        assertTrue { build != null }
-        build!!.getRequests().let { assertTrue { it.isEmpty() } }
-        assertEquals(1, build.getResponses().size)
-        assertTrue { build.isDone() }
+        assertNull(build)
+
+        Specification.contextBuilder()(jsonNode).let {
+            assertAll(
+                { assertTrue(it.isDone()) },
+                { assertNotNull(it) },
+            )
+
+            val responses = it.getResponses()
+
+            assertEquals(1, responses.size)
+            assertFalse(responses.first().isSuccess())
+        }
     }
 
     @Test
@@ -30,12 +39,21 @@ class ContextBuilderTest {
         val jsonNode = JacksonParser.readTree(_jsonInvalidBatch0)
         val spec = Specification.V2_0
 
-        val build = spec.build(jsonNode)
+        val build = spec.builder(jsonNode)
 
-        assertTrue { build != null }
-        build!!.getRequests().let { assertTrue { it.isEmpty() } }
-        assertEquals(1, build.getResponses().size)
-        assertTrue { build.isDone() }
+        assertNull(build)
+
+        Specification.contextBuilder()(jsonNode).let {
+            assertAll(
+                { assertTrue(it.isDone()) },
+                { assertNotNull(it) },
+            )
+
+            val responses = it.getResponses()
+
+            assertEquals(1, responses.size)
+            assertFalse(responses.first().isSuccess())
+        }
     }
 
     @Test
@@ -43,12 +61,21 @@ class ContextBuilderTest {
         val jsonNode = JacksonParser.readTree(_jsonInvalidBatch1)
         val spec = Specification.V2_0
 
-        val build = spec.build(jsonNode)
+        val build = spec.builder(jsonNode)
 
-        assertTrue { build != null }
-        build!!.getRequests().let { assertTrue { it.isEmpty() } }
-        assertEquals(3, build.getResponses().size)
-        assertTrue { build.isDone() }
+        assertNull(build)
+
+        Specification.contextBuilder()(jsonNode).let {
+            assertAll(
+                { assertTrue(it.isDone()) },
+                { assertNotNull(it) },
+            )
+
+            val responses = it.getResponses()
+
+            assertEquals(1, responses.size)
+            assertFalse(responses.first().isSuccess())
+        }
     }
 
 }

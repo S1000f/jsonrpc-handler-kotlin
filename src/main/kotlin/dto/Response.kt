@@ -29,12 +29,8 @@ data class ResponseError(override val jsonrpc: String, override val id: String, 
         }
     }
 
-    override fun isSuccess(): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun isSuccess() = false
 
-    override fun getSuccessInfo(): Any? {
-        TODO("Not yet implemented")
-    }
+    override fun getSuccessInfo() = null
 
 }

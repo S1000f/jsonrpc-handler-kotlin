@@ -11,32 +11,23 @@ class RpcContext private constructor(
 ) : ContextHolder {
 
     companion object {
-        fun of(isBatch: Boolean, requests: List<Request>, responses: List<Response>): RpcContext {
+        fun of(isBatch: Boolean, requests: List<Request>, responses: List<Response>): ContextHolder {
             return RpcContext(LinkedBlockingDeque(requests), LinkedBlockingDeque(responses), false, isBatch)
         }
 
-        fun of(isBatch: Boolean, vararg responses: Response): RpcContext {
+        fun of(isBatch: Boolean, vararg responses: Response): ContextHolder {
             return RpcContext(LinkedBlockingDeque(), LinkedBlockingDeque(responses.toList()), false, isBatch)
         }
     }
 
-    override fun getRequests(): List<Request> {
-        return requests.toList()
-    }
+    override fun getRequests() = requests.toList()
 
-    override fun getResponses(): List<Response> {
-        return responses.toList()
-    }
+    override fun getResponses() = responses.toList()
 
-    override fun isDone(): Boolean {
-        return isDone
-    }
+    override fun isDone() = isDone
 
-    override fun done(): ContextHolder {
-        return RpcContext(requests, responses, true, isBatch)
-    }
+    override fun done() = RpcContext(requests, responses, true, isBatch)
 
-    override fun isBatch(): Boolean {
-        return isBatch
-    }
+    override fun isBatch() = isBatch
+
 }

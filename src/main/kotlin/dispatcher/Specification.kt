@@ -5,23 +5,25 @@ import dto.*
 enum class Specification(override val version: String) : Version, ContextBuilder {
 
     V1_0("1.0") {
+
         override fun isNotification(jsonrpc: String, id: String?): Boolean {
             TODO("Not yet implemented")
         }
 
-        override fun build(jsonHolder: JsonHolder?): ContextHolder {
-            TODO("Not yet implemented")
-        }
+        // TODO: implement
+        override val builder: (JsonHolder?) -> ContextHolder? = { _ -> null }
     },
 
     V2_0("2.0") {
+
         override fun isNotification(jsonrpc: String, id: String?) = jsonrpc == version && id == null
 
-        override fun build(jsonHolder: JsonHolder?): ContextHolder {
+        override val builder: (JsonHolder?) -> ContextHolder? = builder@{ jsonHolder ->
             if (jsonHolder == null) {
-                return RpcContext.of(false, Response.error(version, PresetError.PARSE_ERROR)).done()
+                return@builder RpcContext.of(false, Response.error(version, PresetError.PARSE_ERROR)).done()
             }
 
+            var invalidVersion = false
             var isBatch = false
             val list = mutableListOf<JsonHolder>()
 
@@ -40,33 +42,37 @@ enum class Specification(override val version: String) : Version, ContextBuilder
             val responseList = mutableListOf<Response>()
 
             for (item in list) {
+                val jsonrpc = item.findValue("jsonrpc")
+
+                if (jsonrpc == null || !jsonrpc.isTextual() || jsonrpc.textValue() != version) {
+                    invalidVersion = true
+                    break
+                }
+
                 val id = item.findValue("id")
-                var idValue: String? = null
+                var idValue: String?
                 var isNotification = false
 
                 if (id != null) {
-                    idValue = if (id.isTextual()) {
-                        id.textValue()
-                    } else if (id.isIntegralNumber()) {
-                        id.asText()
-                    } else {
+                    val integralNumber = id.isIntegralNumber()
+                    val text = id.isTextual()
+                    val aNull = id.isNull()
+
+                    if (!integralNumber && !text && !aNull) {
                         responseList.add(Response.error(version, PresetError.INVALID_REQUEST))
                         continue
                     }
+
+                    idValue = id.asText()
+
                 } else {
                     idValue = null
                     isNotification = true
                 }
 
-                val jsonrpc = item.findValue("jsonrpc")
-                if (jsonrpc == null || !jsonrpc.isTextual() || jsonrpc.textValue() != version) {
-                    responseList.add(Response.error(version, PresetError.INVALID_REQUEST))
-                    continue
-                }
+                val method = item.findValue("method")?.textValue() ?: ""
 
-                val method = item.findValue("method")
-
-                if (method == null || method.isNull() || !method.isTextual()) {
+                if (method.isEmpty()) {
                     responseList.add(Response.error(version, PresetError.INVALID_REQUEST))
                     continue
                 }
@@ -78,14 +84,24 @@ enum class Specification(override val version: String) : Version, ContextBuilder
                     continue
                 }
 
-
+                val requestImpl = RequestImpl(method, isNotification, item.toString(), params?.toString(), id = idValue)
+                requestList.add(requestImpl)
             }
 
+            if (invalidVersion) {
+                return@builder null
+            }
 
-
-            TODO("Not yet implemented")
+            return@builder RpcContext.of(isBatch, requestList, responseList)
+                .apply { if (requestList.isEmpty()) done() }
         }
     };
 
-    abstract override fun build(jsonHolder: JsonHolder?): ContextHolder
+    companion object {
+        fun contextBuilder(): (JsonHolder?) -> ContextHolder = { jsonHolder ->
+            Specification.values()
+                .firstNotNullOfOrNull { it.builder(jsonHolder) }
+                ?: RpcContext.of(false, Response.error("2.0", PresetError.INVALID_REQUEST)).done()
+        }
+    }
 }
