@@ -14,27 +14,29 @@ class RpcContext private constructor(
         fun of(isBatch: Boolean, requests: List<Request>, responses: List<Response>): RpcContext {
             return RpcContext(LinkedBlockingDeque(requests), LinkedBlockingDeque(responses), false, isBatch)
         }
+
+        fun of(isBatch: Boolean, vararg responses: Response): RpcContext {
+            return RpcContext(LinkedBlockingDeque(), LinkedBlockingDeque(responses.toList()), false, isBatch)
+        }
     }
 
-
-
     override fun getRequests(): List<Request> {
-        TODO("Not yet implemented")
+        return requests.toList()
     }
 
     override fun getResponses(): List<Response> {
-        TODO("Not yet implemented")
+        return responses.toList()
     }
 
     override fun isDone(): Boolean {
-        TODO("Not yet implemented")
+        return isDone
     }
 
     override fun done(): ContextHolder {
-        TODO("Not yet implemented")
+        return RpcContext(requests, responses, true, isBatch)
     }
 
     override fun isBatch(): Boolean {
-        TODO("Not yet implemented")
+        return isBatch
     }
 }

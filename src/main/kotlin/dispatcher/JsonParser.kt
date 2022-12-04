@@ -1,8 +1,15 @@
 package dispatcher
 
+import com.fasterxml.jackson.core.type.TypeReference
+
 interface JsonParser {
 
-    fun readTree(json: String): JsonHolder?
+    fun readTree(json: String?): JsonHolder?
+
+    fun <T> serialize(data: T): String?
+
+    fun <T> deserialize(json: String, type: TypeReference<T>): T?
+
 }
 
 interface JsonHolder : Iterable<JsonHolder> {

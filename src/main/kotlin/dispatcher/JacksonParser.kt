@@ -1,58 +1,50 @@
 package dispatcher
 
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import util.Helpers
 
 class JacksonParser private constructor(private val node: JsonNode) : JsonHolder {
 
     companion object : JsonParser {
-        override fun readTree(json: String): JsonHolder {
-            return JacksonParser(Helpers.getMapper().readTree(json))
+        override fun readTree(json: String?) = json?.let { JacksonParser(Helpers.getMapper().readTree(it)) }
+
+        override fun <T> serialize(data: T): String? = try {
+            Helpers.getMapper().writeValueAsString(data)
+        } catch (e: JsonProcessingException) {
+            e.printStackTrace()
+            null
+        }
+
+        override fun <T> deserialize(json: String, type: TypeReference<T>): T? = try {
+            Helpers.getMapper().readValue(json, type)
+        } catch (e: JsonProcessingException) {
+            e.printStackTrace()
+            null
         }
     }
 
-    override fun iterator(): Iterator<JsonHolder> {
-        val iterator = node.iterator()
+    override fun iterator() = node.iterator()
+        .asSequence()
+        .map { JacksonParser(it) }
+        .iterator()
 
-        return iterator.asSequence()
-            .map { JacksonParser(it) }
-            .iterator()
-    }
+    override fun isArray() = node.isArray
 
-    override fun isArray(): Boolean {
-        return node.isArray
-    }
+    override fun isEmpty() = node.isEmpty
 
-    override fun isEmpty(): Boolean {
-        return node.isEmpty
-    }
+    override fun findValue(fieldName: String) = node.findValue(fieldName)?.let { JacksonParser(it) }
 
-    override fun findValue(fieldName: String): JsonHolder? {
-        val jsonNode = node.findValue(fieldName) ?: return null
-        return JacksonParser(jsonNode)
-    }
+    override fun isIntegralNumber() = node.isIntegralNumber
 
-    override fun isIntegralNumber(): Boolean {
-        return node.isIntegralNumber
-    }
+    override fun isTextual() = node.isTextual
 
-    override fun isTextual(): Boolean {
-        return node.isTextual
-    }
+    override fun isNull() = node.isNull
 
-    override fun isNull(): Boolean {
-        return node.isNull
-    }
+    override fun asText(): String = node.asText()
 
-    override fun asText(): String {
-        return node.asText()
-    }
+    override fun textValue(): String? = node.textValue()
 
-    override fun textValue(): String? {
-        return node.textValue()
-    }
-
-    override fun toString(): String {
-        return node.toString()
-    }
+    override fun toString() = node.toString()
 }
