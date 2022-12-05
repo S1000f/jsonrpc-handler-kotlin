@@ -20,7 +20,7 @@ enum class Specification(override val version: String) : Version, ContextBuilder
 
         override val builder: (JsonHolder?) -> ContextHolder? = builder@{ jsonHolder ->
             if (jsonHolder == null) {
-                return@builder RpcContext.of(false, Response.error(version, PresetError.PARSE_ERROR)).done()
+                return@builder RpcContext.of(false, Response.error(PresetError.PARSE_ERROR)).done()
             }
 
             var invalidVersion = false
@@ -59,7 +59,7 @@ enum class Specification(override val version: String) : Version, ContextBuilder
                     val aNull = id.isNull()
 
                     if (!integralNumber && !text && !aNull) {
-                        responseList.add(Response.error(version, PresetError.INVALID_REQUEST))
+                        responseList.add(Response.error(PresetError.INVALID_REQUEST))
                         continue
                     }
 
@@ -73,14 +73,14 @@ enum class Specification(override val version: String) : Version, ContextBuilder
                 val method = item.findValue("method")?.textValue() ?: ""
 
                 if (method.isEmpty()) {
-                    responseList.add(Response.error(version, PresetError.INVALID_REQUEST))
+                    responseList.add(Response.error(PresetError.INVALID_REQUEST))
                     continue
                 }
 
                 val params = item.findValue("params")
 
                 if (params != null && params.isNull()) {
-                    responseList.add(Response.error(version, PresetError.INVALID_REQUEST))
+                    responseList.add(Response.error(PresetError.INVALID_REQUEST))
                     continue
                 }
 
@@ -101,7 +101,7 @@ enum class Specification(override val version: String) : Version, ContextBuilder
         fun contextBuilder(): (JsonHolder?) -> ContextHolder = { jsonHolder ->
             Specification.values()
                 .firstNotNullOfOrNull { it.builder(jsonHolder) }
-                ?: RpcContext.of(false, Response.error("2.0", PresetError.INVALID_REQUEST)).done()
+                ?: RpcContext.of(false, Response.error(PresetError.INVALID_REQUEST)).done()
         }
     }
 }
