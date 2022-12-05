@@ -22,6 +22,11 @@ interface Response {
     fun toJson(): String?
 
     companion object {
+
+        fun fromJson(json: String, parser: JsonParser = JacksonParser): Response {
+            return ResponseJsonHolder(json, parser = parser)
+        }
+
         fun <T> success(result: T, request: Request? = null, parser: JsonParser = JacksonParser): Response {
             return ResponseSuccess(
                 result,
