@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import util.Helpers
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import kotlin.test.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ResponseTest {
@@ -258,4 +256,64 @@ class ResponseTest {
         assertNotNull(json3)
         assertEquals("""{"result":[1,2,3],"jsonrpc":"2.0","id":"0"}""", json3)
     }
+
+    @Test
+    fun responseJsonHolderTest() {
+        val json = """
+            {"result":"some","jsonrpc":"2.0","id":"0"}
+        """.trimIndent()
+
+        val response = Response.fromJson(json)
+
+        assertNotNull(response)
+        assertTrue(response.isSuccess())
+        assertEquals("some", response.getSuccessInfo() as String)
+        assertEquals("2.0", response.getVersion())
+        assertEquals("0", response.getResponseId())
+        assertEquals(json, response.toJson())
+
+        val json1 = """
+            {"error":{"code":-32600,"message":"Invalid Request","data":null},"jsonrpc":"2.0","id":"0"}
+        """.trimIndent()
+
+        val response1 = Response.fromJson(json1)
+
+        assertNotNull(response1)
+        assertFalse(response1.isSuccess())
+        assertEquals(-32600, response1.getErrorInfo()!!.code)
+        assertEquals("Invalid Request", response1.getErrorInfo()!!.message)
+        assertNull(response1.getErrorInfo()!!.data)
+        assertEquals("2.0", response1.getVersion())
+        assertEquals("0", response1.getResponseId())
+        assertEquals(json1, response1.toJson())
+
+        val json3 = """
+            {"error":{"code":-32600,"message":"Invalid Request","data":"some"},"jsonrpc":"2.0","id":"0"}
+        """.trimIndent()
+
+        val response3 = Response.fromJson(json3)
+
+        assertNotNull(response3)
+        assertFalse(response3.isSuccess())
+        assertEquals(-32600, response3.getErrorInfo()!!.code)
+        assertEquals("Invalid Request", response3.getErrorInfo()!!.message)
+        assertEquals("some", response3.getErrorInfo()!!.data as String)
+        assertEquals("2.0", response3.getVersion())
+        assertEquals("0", response3.getResponseId())
+        assertEquals(json3, response3.toJson())
+
+        val json2 = """
+            {"result":[1,2,3],"jsonrpc":"2.0","id":"0"}
+        """.trimIndent()
+
+        val response2 = Response.fromJson(json2)
+
+        assertNotNull(response2)
+        assertTrue(response2.isSuccess())
+        assertEquals(listOf(1, 2, 3), response2.getSuccessInfo() as List<Int>)
+        assertEquals("2.0", response2.getVersion())
+        assertEquals("0", response2.getResponseId())
+        assertEquals(json2, response2.toJson())
+    }
+
 }
