@@ -25,10 +25,6 @@ abstract class AbstractHandlerMapper protected constructor(
         this.methodMap = ConcurrentHashMap(methodMap)
     }
 
-    override fun setMatcher(matcher: (Request) -> RpcMethod?) {
-        this.matcher = matcher
-    }
-
     override fun setMethod(methods: Collection<RpcMethod>) {
         methodMap.clear()
 

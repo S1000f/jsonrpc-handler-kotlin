@@ -12,19 +12,18 @@ class RouteMapper private constructor(
     companion object {
         fun empty(): HandlerMapper = RouteMapper(null, emptyMap())
 
-        fun from(matcher: (Request) -> HttpRouteMethod?): HandlerMapper = RouteMapper(matcher, emptyMap())
+        fun from(matcher: (Request) -> RpcMethod?): HandlerMapper = RouteMapper(matcher, emptyMap())
 
-        fun from(methods: Collection<RpcMethod>): HandlerMapper {
-            mutableMapOf<String, RpcMethod>().apply {
-                methods.forEach { method ->
-                    putIfAbsent(method.getName(), method)
-                }
-            }.let { methodMap ->
-                return RouteMapper(null, methodMap)
-            }
-        }
+        fun fromEndpointMap(endpointMap: Map<String, String>): HandlerMapper =
+            from(endpointMap.map { (name, endpoint) -> HttpRouteMethod(name, endpoint) })
 
-        fun from(vararg methods: RpcMethod): HandlerMapper = from(methods.toList())
+        private fun from(methods: Collection<RpcMethod>): HandlerMapper =
+            mutableMapOf<String, RpcMethod>()
+                .apply {
+                    methods.forEach { method ->
+                        putIfAbsent(method.getName(), method)
+                    }
+                }.let { methodMap -> RouteMapper(null, methodMap) }
     }
 
 }

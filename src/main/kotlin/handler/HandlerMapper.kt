@@ -5,9 +5,7 @@ import method.RpcMethod
 
 interface HandlerMapper {
 
-    val matcher: (Request) -> RpcMethod?
-
-    fun setMatcher(matcher: (Request) -> RpcMethod?)
+    var matcher: (Request) -> RpcMethod?
 
     fun setMethod(methods: Collection<RpcMethod>)
 

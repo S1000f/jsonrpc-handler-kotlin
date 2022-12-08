@@ -13,15 +13,13 @@ class MethodMapper private constructor(
 
         fun from(matcher: (Request) -> RpcMethod?): HandlerMapper = MethodMapper(matcher, emptyMap())
 
-        fun from(methods: Collection<RpcMethod>): HandlerMapper {
-            mutableMapOf<String, RpcMethod>().apply {
-                methods.forEach { method ->
-                    putIfAbsent(method.getName(), method)
-                }
-            }.let { methodMap ->
-                return MethodMapper(null, methodMap)
-            }
-        }
+        fun from(methods: Collection<RpcMethod>): HandlerMapper =
+            mutableMapOf<String, RpcMethod>()
+                .apply {
+                    methods.forEach { method ->
+                        putIfAbsent(method.getName(), method)
+                    }
+                }.let { methodMap -> MethodMapper(null, methodMap) }
 
         fun from(vararg methods: RpcMethod): HandlerMapper = from(methods.toList())
     }
