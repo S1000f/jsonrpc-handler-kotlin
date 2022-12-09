@@ -14,22 +14,22 @@ abstract class AbstractHandlerMapper protected constructor(
     protected val methodMap: ConcurrentMap<String, RpcMethod>
 
     init {
+        this.methodMap = ConcurrentHashMap(methodMap)
         this.matcher = matcher ?: match@{ req ->
-            if (methodMap.isNotEmpty()) {
+            if (this.methodMap.isNotEmpty()) {
                 val methodName = req.getMethodName()
-                return@match methodMap[methodName]
+                return@match this.methodMap[methodName]
             }
 
             return@match null
         }
-        this.methodMap = ConcurrentHashMap(methodMap)
     }
 
     override fun setMethod(methods: Collection<RpcMethod>) {
-        methodMap.clear()
+        this.methodMap.clear()
 
         methods.forEach { method ->
-            methodMap[method.getName()] = method
+            this.methodMap[method.getName()] = method
         }
     }
 

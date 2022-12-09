@@ -12,6 +12,6 @@ abstract class AbstractRouteMethod(private val name: String, val endpoint: Strin
 
     override fun getParamsType(): TypeReference<*>? = null
 
-    override fun handle(request: Request, params: Any) = route(this.endpoint, request, params)
+    override fun handle(request: Request, params: Any?) = route(this.endpoint, request, params)
         ?.let { json -> Response.fromJson(json) }
 }

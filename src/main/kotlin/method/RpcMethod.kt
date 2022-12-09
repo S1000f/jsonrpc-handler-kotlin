@@ -10,5 +10,5 @@ interface RpcMethod {
 
     fun getParamsType(): TypeReference<*>?
 
-    fun handle(request: Request, params: Any): Response?
+    fun handle(request: Request, params: Any?): Response?
 }

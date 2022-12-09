@@ -17,6 +17,11 @@ interface Request {
     fun getRequestId(): String?
 
     fun toJson(): String?
+
+    companion object {
+        fun <T> of(method: String, params: T?, jsonrpc: String = "2.0", id: String? = "0"): Request? =
+            RequestImpl.of(method, params, jsonrpc, id)
+    }
 }
 
 data class RequestImpl(
