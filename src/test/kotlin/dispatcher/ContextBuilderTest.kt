@@ -21,7 +21,7 @@ class ContextBuilderTest {
 
         assertNull(build)
 
-        Specification.contextBuilder()(jsonNode).let {
+        Specification.contextBuilder().builder(jsonNode)?.let {
             assertAll(
                 { assertTrue(it.isDone()) },
                 { assertNotNull(it) },
@@ -43,7 +43,7 @@ class ContextBuilderTest {
 
         assertNull(build)
 
-        Specification.contextBuilder()(jsonNode).let {
+        Specification.contextBuilder().builder(jsonNode)?.let {
             assertAll(
                 { assertTrue(it.isDone()) },
                 { assertNotNull(it) },
@@ -65,7 +65,7 @@ class ContextBuilderTest {
 
         assertNull(build)
 
-        Specification.contextBuilder()(jsonNode).let {
+        Specification.contextBuilder().builder(jsonNode)?.let {
             assertAll(
                 { assertTrue(it.isDone()) },
                 { assertNotNull(it) },
