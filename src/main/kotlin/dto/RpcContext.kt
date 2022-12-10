@@ -26,7 +26,10 @@ class RpcContext private constructor(
 
     override fun isDone() = isDone
 
-    override fun done() = RpcContext(requests, responses, true, isBatch)
+    override fun done(responses: Collection<Response>?) =
+        responses?.let {
+            RpcContext(requests, LinkedBlockingDeque(responses), true, isBatch)
+        } ?: RpcContext(requests, this.responses, true, isBatch)
 
     override fun isBatch() = isBatch
 

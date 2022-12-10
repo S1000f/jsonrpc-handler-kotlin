@@ -8,7 +8,7 @@ interface ContextHolder {
 
     fun isDone(): Boolean
 
-    fun done(): ContextHolder
+    fun done(responses: Collection<Response>? = null): ContextHolder
 
     fun isBatch(): Boolean
 }

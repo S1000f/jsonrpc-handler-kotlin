@@ -1,13 +1,18 @@
 package dispatcher
 
+import dto.ContextHolder
 import dto.Request
 import method.RpcMethod
 
-interface Dispatcher<T, R> : ContextBuilder {
+interface Dispatcher<T, R> {
 
     val parser: JsonParser
 
-    val matcher: (Request) -> RpcMethod?
+    val contextBuilder: ContextBuilder
 
-    fun dispatch(jsonPayload: T): R?
+    fun build(jsonHolder: JsonHolder): ContextHolder? = contextBuilder.builder(jsonHolder)
+
+    fun match(request: Request): RpcMethod?
+
+    fun dispatch(jsonPayload: T?): R?
 }

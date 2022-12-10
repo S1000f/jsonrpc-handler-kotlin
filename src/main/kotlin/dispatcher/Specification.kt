@@ -98,10 +98,12 @@ enum class Specification(override val version: String) : Version, ContextBuilder
     };
 
     companion object {
-        fun contextBuilder(): (JsonHolder?) -> ContextHolder = { jsonHolder ->
-            Specification.values()
-                .firstNotNullOfOrNull { it.builder(jsonHolder) }
-                ?: RpcContext.of(false, Response.error(PresetError.INVALID_REQUEST)).done()
+        fun contextBuilder() = object : ContextBuilder {
+            override val builder: (JsonHolder?) -> ContextHolder = { jsonHolder ->
+                Specification.values()
+                    .firstNotNullOfOrNull { it.builder(jsonHolder) }
+                    ?: RpcContext.of(false, Response.error(PresetError.INVALID_REQUEST)).done()
+            }
         }
     }
 }

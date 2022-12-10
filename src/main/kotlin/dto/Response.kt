@@ -36,8 +36,13 @@ interface Response {
             )
         }
 
-        fun error(errorCode: ErrorCode, jsonrpc: String = "2.0", parser: JsonParser = JacksonParser): Response {
-            return ResponseError(ErrorField.from(errorCode), jsonrpc, parser = parser)
+        fun error(
+            errorCode: ErrorCode,
+            id: String? = "0",
+            jsonrpc: String = "2.0",
+            parser: JsonParser = JacksonParser
+        ): Response {
+            return ResponseError(ErrorField.from(errorCode), jsonrpc, id, parser)
         }
     }
 }
