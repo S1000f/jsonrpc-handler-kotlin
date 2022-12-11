@@ -23,7 +23,6 @@ enum class Specification(override val version: String) : Version, ContextBuilder
                 return@builder RpcContext.of(false, Response.error(PresetError.PARSE_ERROR)).done()
             }
 
-            var invalidVersion = false
             var isBatch = false
             val list = mutableListOf<JsonHolder>()
 
@@ -45,8 +44,8 @@ enum class Specification(override val version: String) : Version, ContextBuilder
                 val jsonrpc = item.findValue("jsonrpc")
 
                 if (jsonrpc == null || !jsonrpc.isTextual() || jsonrpc.textValue() != version) {
-                    invalidVersion = true
-                    break
+                    responseList.add(Response.error(PresetError.INVALID_REQUEST))
+                    continue
                 }
 
                 val id = item.findValue("id")
@@ -88,12 +87,8 @@ enum class Specification(override val version: String) : Version, ContextBuilder
                 requestList.add(requestImpl)
             }
 
-            if (invalidVersion) {
-                return@builder null
-            }
-
             return@builder RpcContext.of(isBatch, requestList, responseList)
-                .apply { if (requestList.isEmpty()) done() }
+                .let { if (it.getRequests().isEmpty()) return@builder it.done() else it }
         }
     };
 

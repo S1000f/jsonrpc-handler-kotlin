@@ -1,10 +1,17 @@
 package dto
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.core.type.TypeReference
 import dispatcher.JacksonParser
 import dispatcher.JsonParser
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = ResponseSuccess::class),
+    JsonSubTypes.Type(value = ResponseError::class)
+)
 interface Response {
 
     fun getVersion(): String

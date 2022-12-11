@@ -54,9 +54,11 @@ abstract class AbstractDispatcher(
             return Response.error(PresetError.PARSE_ERROR).toJson()
         } ?: return Response.error(PresetError.PARSE_ERROR).toJson()
 
-        val contextHolder = build(jsonNode)
-            ?.also { if (it.isDone()) return marshal(it) }
-            ?: return Response.error(PresetError.INVALID_REQUEST).toJson()
+        val contextHolder = build(jsonNode) ?: return Response.error(PresetError.INVALID_REQUEST).toJson()
+
+        if (contextHolder.isDone()) {
+            return marshal(contextHolder)
+        }
 
         val resolved: ConcurrentMap<Request, Response> = ConcurrentHashMap()
 
