@@ -33,4 +33,30 @@ class RpcContext private constructor(
 
     override fun isBatch() = isBatch
 
+    override fun toString(): String {
+        return "RpcContext(requests=$requests, responses=$responses, isDone=$isDone, isBatch=$isBatch)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RpcContext
+
+        if (requests != other.requests) return false
+        if (responses != other.responses) return false
+        if (isDone != other.isDone) return false
+        if (isBatch != other.isBatch) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = requests.hashCode()
+        result = 31 * result + responses.hashCode()
+        result = 31 * result + isDone.hashCode()
+        result = 31 * result + isBatch.hashCode()
+        return result
+    }
+
 }

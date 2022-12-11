@@ -78,7 +78,7 @@ data class RequestImpl(
 }
 
 @Serializable
-data class Scaffold<T>(
+class Scaffold<T>(
     val method: String,
     val params: T?,
     val jsonrpc: String = "2.0",
@@ -104,5 +104,31 @@ data class Scaffold<T>(
 
     @JsonIgnore
     override fun toJson() = parser.serialize(this)
+
+    override fun toString(): String {
+        return "Scaffold(method='$method', params=$params, jsonrpc='$jsonrpc', id=$id)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Scaffold<*>
+
+        if (method != other.method) return false
+        if (params != other.params) return false
+        if (jsonrpc != other.jsonrpc) return false
+        if (id != other.id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = method.hashCode()
+        result = 31 * result + (params?.hashCode() ?: 0)
+        result = 31 * result + jsonrpc.hashCode()
+        result = 31 * result + (id?.hashCode() ?: 0)
+        return result
+    }
 
 }

@@ -131,7 +131,7 @@ class ResponseJsonHolder(private val json: String, private val parser: JsonParse
 
 }
 
-data class ResponseSuccess<T>(
+class ResponseSuccess<T>(
     val result: T,
     val jsonrpc: String = "2.0",
     val id: String? = "0",
@@ -159,6 +159,30 @@ data class ResponseSuccess<T>(
     @JsonIgnore
     override fun toJson() = parser.serialize(this)
 
+    override fun toString(): String {
+        return "ResponseSuccess(result=$result, jsonrpc='$jsonrpc', id=$id)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ResponseSuccess<*>
+
+        if (result != other.result) return false
+        if (jsonrpc != other.jsonrpc) return false
+        if (id != other.id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result1 = result?.hashCode() ?: 0
+        result1 = 31 * result1 + jsonrpc.hashCode()
+        result1 = 31 * result1 + (id?.hashCode() ?: 0)
+        return result1
+    }
+
 }
 
 data class ErrorField<out T>(val code: Int, val message: String, val data: T?) {
@@ -167,7 +191,7 @@ data class ErrorField<out T>(val code: Int, val message: String, val data: T?) {
     }
 }
 
-data class ResponseError<T : Any>(
+class ResponseError<T : Any>(
     val error: ErrorField<T>,
     val jsonrpc: String = "2.0",
     val id: String? = "0",
@@ -194,5 +218,29 @@ data class ResponseError<T : Any>(
 
     @JsonIgnore
     override fun toJson(): String? = parser.serialize(this)
+
+    override fun toString(): String {
+        return "ResponseError(error=$error, jsonrpc='$jsonrpc', id=$id)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ResponseError<*>
+
+        if (error != other.error) return false
+        if (jsonrpc != other.jsonrpc) return false
+        if (id != other.id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = error.hashCode()
+        result = 31 * result + jsonrpc.hashCode()
+        result = 31 * result + (id?.hashCode() ?: 0)
+        return result
+    }
 
 }
