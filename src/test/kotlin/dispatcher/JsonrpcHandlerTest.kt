@@ -11,7 +11,9 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import util.Helpers
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
+@Suppress("UNCHECKED_CAST")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JsonrpcHandlerTest {
 
@@ -26,6 +28,126 @@ class JsonrpcHandlerTest {
             val sum = list.sum()
             return Response.success(sum, request)
         }
+    }
+
+    @Test
+    fun singleNotificationTest() {
+        val json = """{"jsonrpc": "2.0", "method": "echo", "params": "hello"}"""
+
+        val dispatch = JsonrpcHandler(MethodMapper.from(SampleEchoMethod())).dispatch(json)
+
+        assertNull(dispatch)
+    }
+
+    @Test
+    fun singleRequestMethodNotFoundTest() {
+        val json = """{"jsonrpc": "2.0", "method": "abcd", "params": [1,2], "id": 1}"""
+
+        val jsonrpcHandler = JsonrpcHandler(MethodMapper.from(AdderMethod()))
+        val dispatch = jsonrpcHandler.dispatch(json)
+
+        assertNotNull(dispatch)
+
+        val deserialize = Helpers.deserialize(dispatch, object : TypeReference<ResponseError<Any>>() {})
+
+        assertNotNull(deserialize)
+        assertEquals(PresetError.METHOD_NOT_FOUND.code, deserialize.getErrorInfo().code)
+    }
+
+    @Test
+    fun singleRequestInvalidParamsTest() {
+        val json = """{"jsonrpc": "2.0", "method": "adder", "params": "adder", "id": 1}"""
+
+        val jsonrpcHandler = JsonrpcHandler(MethodMapper.from(AdderMethod()))
+        val dispatch = jsonrpcHandler.dispatch(json)
+
+        assertNotNull(dispatch)
+
+        val deserialize = Helpers.deserialize(dispatch, object : TypeReference<ResponseError<Any>>() {})
+
+        assertNotNull(deserialize)
+        assertEquals(PresetError.INVALID_PARAMS.code, deserialize.getErrorInfo().code)
+    }
+
+    @Test
+    fun singleRequestParsingInvalidTest() {
+        val json = """{"jsonrpc": "2.0","id":42, "method": "adder", "params"}"""
+
+        val jsonrpcHandler = JsonrpcHandler(MethodMapper.from(AdderMethod()))
+        val dispatch = jsonrpcHandler.dispatch(json)
+
+        assertNotNull(dispatch)
+
+        val deserialize = Helpers.deserialize(dispatch, object : TypeReference<ResponseError<Any>>() {})
+
+        assertNotNull(deserialize)
+        assertEquals(PresetError.PARSE_ERROR.code, deserialize.getErrorInfo().code)
+    }
+
+    @Test
+    fun batchSomeSuccessAndSomeFailedAndSomeNotificationTest() {
+        val json = """[{"jsonrpc": "2.0", "method": "echo", "params": "hello, world!"},
+            {"jsonrpc": "2.0", "method": "adder", "params": [1,2], "id": 2},
+            {"jsonrpc":"2.0","method":"adder","params":"fail","id":"12"}]""".trimIndent()
+
+        val jsonrpcHandler = JsonrpcHandler(MethodMapper.from(AdderMethod(), SampleEchoMethod()))
+        val dispatch = jsonrpcHandler.dispatch(json)
+
+        assertNotNull(dispatch)
+
+        val deserialize = Helpers.deserialize(dispatch, object : TypeReference<List<Response>>() {})
+
+        assertNotNull(deserialize)
+        assertEquals(2, deserialize.size)
+
+        val success = deserialize.find { it.isSuccess() }
+        val failed = deserialize.find { !it.isSuccess() }
+
+        assertNotNull(success)
+        assertNotNull(failed)
+
+        assertEquals(3, success.getSuccessInfo().toString().toInt())
+        assertEquals(PresetError.INVALID_PARAMS.code, failed.getErrorInfo()?.code)
+        assertEquals("12", failed.getResponseId())
+    }
+
+    @Test
+    fun batchSomeNotificationAndSomeSuccessTest() {
+        val json = """[{"jsonrpc": "2.0", "method": "echo", "params": "hello, world!"},
+            {"jsonrpc": "2.0", "method": "adder", "params": [1,2], "id": 2}]""".trimIndent()
+
+        val jsonrpcHandler = JsonrpcHandler(MethodMapper.from(SampleEchoMethod(), AdderMethod()))
+        val dispatch = jsonrpcHandler.dispatch(json)
+
+        assertNotNull(dispatch)
+
+        val deserialize = Helpers.deserialize(dispatch, object : TypeReference<List<Response>>() {})
+
+        assertNotNull(deserialize)
+        assertEquals(1, deserialize.size)
+
+        val response = deserialize.first()
+
+        assertDoesNotThrow { response as ResponseSuccess<Int> }
+
+        val responseSuccess = response as ResponseSuccess<Int>
+
+        assertEquals(3, responseSuccess.result)
+    }
+
+    @Test
+    fun batchAllNotificationTest() {
+        val json = """
+            [
+                {"jsonrpc": "2.0", "method": "echo", "params": "hello, world!"},
+                {"jsonrpc": "2.0", "method": "echo", "params": "hello, world!"}
+            ]
+        """.trimIndent()
+
+        val jsonrpcHandler = JsonrpcHandler(MethodMapper.from(SampleEchoMethod()))
+        val dispatch = jsonrpcHandler.dispatch(json)
+
+        assertNull(dispatch)
     }
 
     @Test
