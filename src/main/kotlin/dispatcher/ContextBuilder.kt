@@ -10,7 +10,6 @@ import dto.ContextHolder
  * In case the property has noticed that the data is fit for a certain
  * version of JSON-RPC specification, it must return a context holder which contains a proper Response class
  * and is marked done, even though the data is not valid for the specification.
- * @since 1.0.0
  * @see JsonHolder
  * @see ContextHolder
  */

@@ -10,12 +10,23 @@ import method.RpcMethod
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
+/**
+ * Abstract dispatcher for handling requests. It implements the main logic which is template method and provides
+ * hook method, [marshal] for extending. [JacksonParser] is used as default parser.
+ *
+ * This abstract class uses the marshal method to format the result of the handle method.
+ * This ensures that the output follows the JSON-RPC specification.
+ */
 abstract class AbstractDispatcher(
     override val contextBuilder: ContextBuilder,
     val handlerMapper: HandlerMapper? = null,
     override val parser: JsonParser = JacksonParser
 ) : Dispatcher<String, String> {
 
+    /**
+     * Returns a JSON-RPC response. The argument must be marked as done which means [ContextHolder.isDone] returns true.
+     * It also checks if the request is a batch. If it is, this method returns a JSON-RPC response which is a batch.
+     */
     protected fun marshal(contextHolder: ContextHolder): String? {
         val responses = contextHolder.getResponses()
 
@@ -39,6 +50,10 @@ abstract class AbstractDispatcher(
         }.let { return it }
     }
 
+    /**
+     * Returns [Response] which is built from a matched [RpcMethod]. It may be overridden to change the behavior before
+     * returning a response that [RpcMethod] has produced.
+     */
     protected abstract fun handle(method: RpcMethod, request: Request, params: Any?): Response?
 
     override fun match(request: Request): RpcMethod? = handlerMapper?.let { it.matcher(request) }
