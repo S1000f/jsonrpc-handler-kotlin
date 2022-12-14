@@ -2,8 +2,14 @@ package dispatcher
 
 import dto.*
 
+/**
+ * It validates a request for JSON-RPC specification and builds a [ContextHolder] at the same time.
+ */
 enum class Specification(override val version: String) : Version, ContextBuilder {
 
+    /**
+     * JSON-RPC 1.0 specification.
+     */
     V1_0("1.0") {
 
         override fun isNotification(jsonrpc: String, id: String?): Boolean {
@@ -14,6 +20,9 @@ enum class Specification(override val version: String) : Version, ContextBuilder
         override val builder: (JsonHolder?) -> ContextHolder? = { _ -> null }
     },
 
+    /**
+     * JSON-RPC 2.0 specification.
+     */
     V2_0("2.0") {
 
         override fun isNotification(jsonrpc: String, id: String?) = jsonrpc == version && id == null
@@ -93,6 +102,9 @@ enum class Specification(override val version: String) : Version, ContextBuilder
     };
 
     companion object {
+        /**
+         * Returns a [ContextBuilder] that validates a request with all versions of JSON-RPC in the [Specification] enum class.
+         */
         fun contextBuilder() = object : ContextBuilder {
             override val builder: (JsonHolder?) -> ContextHolder = { jsonHolder ->
                 Specification.values()
