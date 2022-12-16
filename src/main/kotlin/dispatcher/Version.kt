@@ -7,8 +7,14 @@ package dispatcher
  */
 interface Version {
 
+    /**
+     * Returns the version of the JSON-RPC specification, e.g. "2.0".
+     */
     val version: String
 
+    /**
+     * Returns true if the request is a Notification, false otherwise.
+     */
     fun isNotification(jsonrpc: String, id: String?): Boolean
 
 }
