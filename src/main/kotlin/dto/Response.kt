@@ -192,8 +192,16 @@ class ResponseSuccess<T>(
 
 }
 
-data class ErrorField<out T>(val code: Int, val message: String, val data: T?) {
+/**
+ * This data class is used to represent the Error object in the JSON-RPC 2.0 specification.
+ * In a failure response, the data field may be omitted and is allowed to be defined by the server.
+ * @param T type of error `data` field
+ */
+data class ErrorField<out T>(override val code: Int, override val message: String, val data: T?) : ErrorCode {
     companion object {
+        /**
+         * Returns a new instance of [ErrorField] with the [code] and [message] from the [errorCode].
+         */
         fun from(errorCode: ErrorCode) = ErrorField(errorCode.code, errorCode.message, null)
     }
 }
