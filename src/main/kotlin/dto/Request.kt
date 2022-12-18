@@ -5,17 +5,46 @@ import dispatcher.JacksonParser
 import dispatcher.JsonParser
 import kotlinx.serialization.Serializable
 
+/**
+ * It is a request object that is sent to the server. Here is an example of a request:
+ * ```json
+ * {"jsonrpc": "2.0", "method": "subtract", "params": [42, 41], "id": "0"}
+ * ```
+ * for more information, see [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)
+ */
 interface Request {
+
+    /**
+     * Returns a JSON-RPC version.
+     */
     fun getVersion(): String
 
+    /**
+     * Returns a method name.
+     */
     fun getMethodName(): String
 
+    /**
+     * Returns true if the request is a Notification.
+     */
     fun isNotification(): Boolean
 
+    /**
+     * Returns a parameter in JSON format. The parameters are not mandatory.
+     */
     fun getParameters(): String?
 
+    /**
+     * Returns an id of the request. The id can be string, integer or null. This method always returns a string converting
+     * the integer to string.
+     *
+     * Returning null does not guarantee that the request is a Notification. If you want to check it, use [isNotification] method.
+     */
     fun getRequestId(): String?
 
+    /**
+     * Returns a JSON string of the request.
+     */
     fun toJson(): String?
 
     companion object {
@@ -24,6 +53,9 @@ interface Request {
     }
 }
 
+/**
+ * This data class is a default implementation of [Request]. It keeps a json string of the request.
+ */
 data class RequestImpl(
     private val method: String,
     private val notificator: Boolean,
@@ -34,6 +66,13 @@ data class RequestImpl(
 ) : Request {
 
     companion object {
+
+        /**
+         * Returns a new instance of [RequestImpl] using the given parameters. If the given parameters are invalid, it
+         * returns null.
+         *
+         * It creates a json string of the request using [parser].
+         */
         fun <T> of(
             method: String,
             params: T?,
@@ -77,6 +116,10 @@ data class RequestImpl(
 
 }
 
+/**
+ * This class is a default implementation of [Request] using [Serializable] annotation.
+ * @param T the type of the parameters
+ */
 @Serializable
 class Scaffold<T>(
     val method: String,
