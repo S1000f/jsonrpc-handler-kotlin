@@ -3,6 +3,9 @@ package dto
 import java.util.concurrent.BlockingDeque
 import java.util.concurrent.LinkedBlockingDeque
 
+/**
+ * It is a default implementation of [ContextHolder]. It uses a thread-safe [BlockingDeque] to store the context.
+ */
 class RpcContext private constructor(
     private val requests: BlockingDeque<Request>,
     private val responses: BlockingDeque<Response>,
@@ -11,10 +14,17 @@ class RpcContext private constructor(
 ) : ContextHolder {
 
     companion object {
+
+        /**
+         * Returns a new instance of [RpcContext] using the given parameters.
+         */
         fun of(isBatch: Boolean, requests: List<Request>, responses: List<Response>): ContextHolder {
             return RpcContext(LinkedBlockingDeque(requests), LinkedBlockingDeque(responses), false, isBatch)
         }
 
+        /**
+         * Returns a new instance of [RpcContext] using the given parameters. A requests property is empty.
+         */
         fun of(isBatch: Boolean, vararg responses: Response): ContextHolder {
             return RpcContext(LinkedBlockingDeque(), LinkedBlockingDeque(responses.toList()), false, isBatch)
         }

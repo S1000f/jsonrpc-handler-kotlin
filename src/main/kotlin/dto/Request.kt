@@ -48,6 +48,13 @@ interface Request {
     fun toJson(): String?
 
     companion object {
+
+        /**
+         * Returns a new instance of [Request] using the given parameters. If the given parameters are invalid, it
+         * returns null.
+         *
+         * It creates a json string of the request.
+         */
         fun <T> of(method: String, params: T?, jsonrpc: String = "2.0", id: String? = "0"): Request? =
             RequestImpl.of(method, params, jsonrpc, id)
     }

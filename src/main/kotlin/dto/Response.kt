@@ -7,6 +7,13 @@ import com.fasterxml.jackson.core.type.TypeReference
 import dispatcher.JacksonParser
 import dispatcher.JsonParser
 
+/**
+ * It is a response object. Here is an example of a success response:
+ * ```json
+ * {"jsonrpc": "2.0", "result", "success data", "id": "0"}
+ * ```
+ * for more information, see [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)
+ */
 @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
 @JsonSubTypes(
     JsonSubTypes.Type(value = ResponseSuccess::class),
@@ -14,26 +21,55 @@ import dispatcher.JsonParser
 )
 interface Response {
 
+    /**
+     * Returns a JSON-RPC version.
+     */
     fun getVersion(): String
 
+    /**
+     * Returns an id of the response. The id can be string, integer or null. This method always returns a string converting
+     * the integer to string.
+     */
     fun getResponseId(): String?
 
+    /**
+     * Returns true if the response is a success response, false otherwise.
+     */
     fun isSuccess(): Boolean
 
+    /**
+     * Returns a result in JSON format. If the response is a failure response, it returns null.
+     */
     fun getSuccessJson(): String?
 
+    /**
+     * Returns a result object. If the response is a failure response, it returns null.
+     */
     fun getSuccessInfo(): Any?
 
+    /**
+     * Returns an error object. If the response is a success response, it returns null.
+     */
     fun getErrorInfo(): ErrorField<Any>?
 
+    /**
+     * Returns a JSON string of the response.
+     */
     fun toJson(): String?
 
     companion object {
 
+        /**
+         * Returns a new instance of [Response] using the given json string.
+         */
         fun fromJson(json: String, parser: JsonParser = JacksonParser): Response {
             return ResponseJsonHolder(json, parser = parser)
         }
 
+        /**
+         * Returns a new instance of [Response] using the given parameters. If the request parameter is null, it uses
+         * jsonrpc 2.0 and id 0 as default.
+         */
         fun <T> success(result: T, request: Request? = null, parser: JsonParser = JacksonParser): Response {
             return ResponseSuccess(
                 result,
@@ -43,6 +79,9 @@ interface Response {
             )
         }
 
+        /**
+         * Returns a new instance of [Response] using the given parameters.
+         */
         fun error(
             errorCode: ErrorCode,
             id: String? = "0",
@@ -54,6 +93,10 @@ interface Response {
     }
 }
 
+/**
+ * It is a response object. This class has no information on success or failure until you call [isSuccess] method.
+ * All methods of this class read the JSON string and parse the string every time it is called.
+ */
 class ResponseJsonHolder(private val json: String, private val parser: JsonParser = JacksonParser) : Response {
 
     @JsonIgnore
@@ -138,6 +181,10 @@ class ResponseJsonHolder(private val json: String, private val parser: JsonParse
 
 }
 
+/**
+ * It is a success response object. A success response always has a result property.
+ * @param T the type of the result
+ */
 class ResponseSuccess<T>(
     val result: T,
     val jsonrpc: String = "2.0",
@@ -206,6 +253,14 @@ data class ErrorField<out T>(override val code: Int, override val message: Strin
     }
 }
 
+/**
+ * It is a failure response object. A failure response always has an error object inside.
+ * Here is an example of an error response:
+ * ```json
+ * {"jsonrpc": "2.0", "error": {"code": -32602, "message": "Invalid Params", "data": "username is required"}, "id": 1}
+ * ```
+ * @param T type of `data` field in an error object
+ */
 class ResponseError<T : Any>(
     val error: ErrorField<T>,
     val jsonrpc: String = "2.0",
