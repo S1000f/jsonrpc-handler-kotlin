@@ -5,6 +5,14 @@ import method.RpcMethod
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
+/**
+ * Abstract implementation of [HandlerMapper]. It uses a map to store methods.
+ *
+ * The default matcher of this class extracts a method name from the given request and then tries to find a method
+ * from the map using the method name as a key.
+ * @see MethodMapper
+ * @see RouteMapper
+ */
 abstract class AbstractHandlerMapper protected constructor(
     matcher: ((Request) -> RpcMethod?)?,
     methodMap: Map<String, RpcMethod> = emptyMap()
