@@ -15,11 +15,6 @@ class ContextBuilderTest {
     @Test
     fun batchEmptyArrayTest() {
         val jsonNode = JacksonParser.readTree(_jsonEmptyArray)
-        val spec = Specification.V2_0
-
-        val build = spec.builder(jsonNode)
-
-        assertNull(build)
 
         Specification.contextBuilder().builder(jsonNode)?.let {
             assertAll(
@@ -37,11 +32,6 @@ class ContextBuilderTest {
     @Test
     fun invalidBatchArrayTest() {
         val jsonNode = JacksonParser.readTree(_jsonInvalidBatch0)
-        val spec = Specification.V2_0
-
-        val build = spec.builder(jsonNode)
-
-        assertNull(build)
 
         Specification.contextBuilder().builder(jsonNode)?.let {
             assertAll(
@@ -59,11 +49,6 @@ class ContextBuilderTest {
     @Test
     fun invalidBatchArrayTest1() {
         val jsonNode = JacksonParser.readTree(_jsonInvalidBatch1)
-        val spec = Specification.V2_0
-
-        val build = spec.builder(jsonNode)
-
-        assertNull(build)
 
         Specification.contextBuilder().builder(jsonNode)?.let {
             assertAll(
@@ -73,8 +58,10 @@ class ContextBuilderTest {
 
             val responses = it.getResponses()
 
-            assertEquals(1, responses.size)
+            assertEquals(3, responses.size)
             assertFalse(responses.first().isSuccess())
+            assertFalse(responses[1].isSuccess())
+            assertFalse(responses.last().isSuccess())
         }
     }
 

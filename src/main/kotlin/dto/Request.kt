@@ -17,21 +17,25 @@ interface Request {
     /**
      * Returns a JSON-RPC version.
      */
+    @JsonIgnore
     fun getVersion(): String
 
     /**
      * Returns a method name.
      */
+    @JsonIgnore
     fun getMethodName(): String
 
     /**
      * Returns true if the request is a Notification.
      */
+    @JsonIgnore
     fun isNotification(): Boolean
 
     /**
      * Returns a parameter in JSON format. The parameters are not mandatory.
      */
+    @JsonIgnore
     fun getParameters(): String?
 
     /**
@@ -40,11 +44,13 @@ interface Request {
      *
      * Returning null does not guarantee that the request is a Notification. If you want to check it, use [isNotification] method.
      */
+    @JsonIgnore
     fun getRequestId(): String?
 
     /**
      * Returns a JSON string of the request.
      */
+    @JsonIgnore
     fun toJson(): String?
 
     companion object {
@@ -136,23 +142,17 @@ class Scaffold<T>(
     private val parser: JsonParser = JacksonParser
 ) : Request {
 
-    @JsonIgnore
     override fun getVersion() = jsonrpc
 
-    @JsonIgnore
     override fun getMethodName() = method
 
     // FIXME: apply encapsulation
-    @JsonIgnore
     override fun isNotification() = jsonrpc == "2.0" && id == null
 
-    @JsonIgnore
     override fun getParameters() = params?.let { parser.serialize(it) }
 
-    @JsonIgnore
     override fun getRequestId() = id
 
-    @JsonIgnore
     override fun toJson() = parser.serialize(this)
 
     override fun toString(): String {

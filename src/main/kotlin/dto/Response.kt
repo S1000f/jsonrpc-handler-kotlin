@@ -24,37 +24,44 @@ interface Response {
     /**
      * Returns a JSON-RPC version.
      */
+    @JsonIgnore
     fun getVersion(): String
 
     /**
      * Returns an id of the response. The id can be string, integer or null. This method always returns a string converting
      * the integer to string.
      */
+    @JsonIgnore
     fun getResponseId(): String?
 
     /**
      * Returns true if the response is a success response, false otherwise.
      */
+    @JsonIgnore
     fun isSuccess(): Boolean
 
     /**
      * Returns a result in JSON format. If the response is a failure response, it returns null.
      */
+    @JsonIgnore
     fun getSuccessJson(): String?
 
     /**
      * Returns a result object. If the response is a failure response, it returns null.
      */
+    @JsonIgnore
     fun getSuccessInfo(): Any?
 
     /**
      * Returns an error object. If the response is a success response, it returns null.
      */
+    @JsonIgnore
     fun getErrorInfo(): ErrorField<Any>?
 
     /**
      * Returns a JSON string of the response.
      */
+    @JsonIgnore
     fun toJson(): String?
 
     companion object {
@@ -99,7 +106,6 @@ interface Response {
  */
 class ResponseJsonHolder(private val json: String, private val parser: JsonParser = JacksonParser) : Response {
 
-    @JsonIgnore
     override fun getVersion(): String = try {
         parser.readTree(json)
             ?.findValue("jsonrpc")
@@ -108,7 +114,6 @@ class ResponseJsonHolder(private val json: String, private val parser: JsonParse
         "2.0"
     }
 
-    @JsonIgnore
     override fun getResponseId(): String? = try {
         parser.readTree(json)
             ?.findValue("id")
@@ -117,7 +122,6 @@ class ResponseJsonHolder(private val json: String, private val parser: JsonParse
         null
     }
 
-    @JsonIgnore
     override fun isSuccess(): Boolean = try {
         parser.readTree(json)
             ?.findValue("result")
@@ -127,7 +131,6 @@ class ResponseJsonHolder(private val json: String, private val parser: JsonParse
         false
     }
 
-    @JsonIgnore
     override fun getSuccessJson(): String? = try {
         parser.readTree(json)
     } catch (e: Exception) {
@@ -135,7 +138,6 @@ class ResponseJsonHolder(private val json: String, private val parser: JsonParse
         null
     }?.findValue("result")?.toString()
 
-    @JsonIgnore
     override fun getSuccessInfo(): Any? = try {
         parser.readTree(json)
             ?.findValue("result")
@@ -147,7 +149,6 @@ class ResponseJsonHolder(private val json: String, private val parser: JsonParse
         null
     }
 
-    @JsonIgnore
     override fun getErrorInfo(): ErrorField<Any>? = try {
         parser.readTree(json)
             ?.findValue("error")
@@ -159,7 +160,6 @@ class ResponseJsonHolder(private val json: String, private val parser: JsonParse
         null
     }
 
-    @JsonIgnore
     override fun toJson(): String = json
 
     override fun toString() = toJson()
@@ -192,25 +192,18 @@ class ResponseSuccess<T>(
     private val parser: JsonParser = JacksonParser
 ) : Response {
 
-    @JsonIgnore
     override fun getVersion() = jsonrpc
 
-    @JsonIgnore
     override fun getResponseId() = id
 
-    @JsonIgnore
     override fun isSuccess() = true
 
-    @JsonIgnore
     override fun getSuccessJson() = parser.serialize(result)
 
-    @JsonIgnore
     override fun getSuccessInfo() = result
 
-    @JsonIgnore
     override fun getErrorInfo() = null
 
-    @JsonIgnore
     override fun toJson() = parser.serialize(this)
 
     override fun toString(): String {
@@ -268,25 +261,18 @@ class ResponseError<T : Any>(
     private val parser: JsonParser = JacksonParser
 ) : Response {
 
-    @JsonIgnore
     override fun getVersion() = jsonrpc
 
-    @JsonIgnore
     override fun getResponseId() = id
 
-    @JsonIgnore
     override fun isSuccess() = false
 
-    @JsonIgnore
     override fun getSuccessJson() = null
 
-    @JsonIgnore
     override fun getSuccessInfo() = null
 
-    @JsonIgnore
     override fun getErrorInfo(): ErrorField<Any> = error
 
-    @JsonIgnore
     override fun toJson(): String? = parser.serialize(this)
 
     override fun toString(): String {
