@@ -10,6 +10,9 @@ import java.net.HttpURLConnection
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
+/**
+ * A default implementation of [AbstractRouteMethod]. It routes requests to the given endpoint over HTTP or HTTPS.
+ */
 class HttpRouteMethod(name: String, endpoint: String) :
     AbstractRouteMethod(name, endpoint) {
 

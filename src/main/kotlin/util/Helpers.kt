@@ -14,8 +14,18 @@ private val mapper = jacksonObjectMapper()
 
 object Helpers {
 
+    /**
+     * Returns a Jackson-bind object mapper.
+     *
+     * It is configured to ignore unknown properties and empty beans.
+     */
     fun getMapper(): ObjectMapper = mapper
 
+    /**
+     * Returns a JSON string from the given object by Jackson mapper. If the object is null, it returns null.
+     *
+     * It is configured to ignore unknown properties and empty beans.
+     */
     fun <T> serialize(data: T): String? = try {
         mapper.writeValueAsString(data)
     } catch (e: JsonProcessingException) {
@@ -23,6 +33,11 @@ object Helpers {
         null
     }
 
+    /**
+     * Returns an object from the given JSON string by Jackson mapper. If the string is null, it returns null.
+     *
+     * It is configured to ignore unknown properties and empty beans.
+     */
     fun <T> deserialize(json: String, type: TypeReference<T>): T? = try {
         mapper.readValue(json, type)
     } catch (e: JsonProcessingException) {
