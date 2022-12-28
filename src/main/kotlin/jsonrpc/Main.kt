@@ -1,0 +1,4 @@
+package jsonrpc
+
+fun main() {
+}
