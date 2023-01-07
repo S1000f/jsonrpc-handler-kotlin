@@ -33,3 +33,61 @@ fun Application.module() {
 }
 ```
 
+This server listens to POST requests on the root path. `call.receiveText()` receives the request body as a string.
+`jsonrpcHandler.dispatch(receiveText)` dispatches the request to the method mapper and returns the response as a string
+if the request is not a Notification. `call.respondText(contentType = ContentType.Application.Json, text = it)` responds
+with a JSON string.
+
+Note that in this example, the `ktor-server-content-negotiation` plugin is not required.
+
+```http request
+POST http://localhost:8080
+Content-Type: application/json
+
+{
+  "jsonrpc": "2.0",
+  "id": 0,
+  "method": "echo"
+}
+```
+Start the server, and we can now invoke the 'echo' method on the server remotely
+
+```http
+HTTP/1.1 200 OK
+Content-Length: 76
+Content-Type: application/json; charset=UTF-8
+Connection: keep-alive
+
+{
+  "result": {
+    "method": "echo",
+    "timestamp": 1673097162
+  },
+  "jsonrpc": "2.0",
+  "id": "0"
+}
+```
+the body of the response is the expected JSON-RPC response.
+
+### 2.2 Spring Boot
+
+```kotlin
+@SpringBootApplication
+class DemoJsonrpcSpringApplication {
+    @Bean
+    fun jsonrpcHandler() = JsonrpcHandler(MethodMapper.from(SampleEchoMethod()))
+}
+
+fun main(args: Array<String>) {
+    runApplication<DemoJsonrpcSpringApplication>(*args)
+}
+
+@RestController
+class Controller(val jsonRpcHandler: Dispatcher<String, String>) {
+    @PostMapping(produces = ["application/json"])
+    fun handle(@RequestBody message: String): String? = 
+        jsonRpcHandler.dispatch(message)?.let { return it }
+}
+```
+Create Bean of `JsonrpcHandler` and inject it to the controller.
+In this example, the handler method produces 'application/json' by `@PostMapping(produces = ["application/json"])`.
