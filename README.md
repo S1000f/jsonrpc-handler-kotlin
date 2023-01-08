@@ -91,3 +91,121 @@ class Controller(val jsonRpcHandler: Dispatcher<String, String>) {
 ```
 Create Bean of `JsonrpcHandler` and inject it to the controller.
 In this example, the handler method produces 'application/json' by `@PostMapping(produces = ["application/json"])`.
+
+## 3. Create a method
+You can create a method by implementing the `RpcMethod` interface.
+
+```kotlin
+class AddMethod : RpcMethod {
+    override fun getName(): String = "add"
+
+    override fun getParamsType(): TypeReference<*> = object : TypeReference<List<Int>>() {}
+
+    override fun handle(request: Request, params: Any?): Response {
+        val list = params as? List<Int> ?: return Response.error(PresetError.INVALID_PARAMS)
+        return when (list.size) {
+            0, 1 -> Response.error(PresetError.INVALID_PARAMS)
+            else -> Response.success(list.sum(), request)
+        }
+    }
+}
+```
+
+In this example, the method name is 'add', and this method requires `List<Int>` as a parameter type.
+You can cast `params` without checking its type, as the dispatcher will check the parameter type 
+and return an error response if it does not match the required `List<Int>` type.
+
+```kotlin
+fun Application.module() {
+    val jsonrpcHandler = JsonrpcHandler(MethodMapper.from(SampleEchoMethod(), AddMethod()))
+    routing {
+        post("/") {
+            val receiveText = call.receiveText()
+            jsonrpcHandler.dispatch(receiveText)?.let {
+                call.respondText(contentType = ContentType.Application.Json, text = it)
+            }
+        }
+    }
+}
+```
+Attach the method to the method mapper.
+
+```http request
+POST http://localhost:8080
+Content-Type: application/json
+
+{
+  "jsonrpc": "2.0",
+  "id": 0,
+  "method": "add",
+  "params": [42, 42]
+}
+```
+```
+HTTP/1.1 200 OK
+Content-Length: 38
+Content-Type: application/json; charset=UTF-8
+Connection: keep-alive
+
+{
+  "result": 84,
+  "jsonrpc": "2.0",
+  "id": "0"
+}
+```
+Now that we have created a method and registered it with the dispatcher, we can call it remotely.
+
+
+```kotlin
+data class MultiplyEachParams(val list: List<Int>, val multiplier: Int)
+class MultiplyEachMethod : RpcMethod {
+    override fun getName() = "multiplyEach"
+
+    override fun getParamsType() = object : TypeReference<MultiplyEachParams>() {}
+
+    override fun handle(request: Request, params: Any?): Response {
+        val parameter = params as? MultiplyEachParams
+            ?: return Response.error(PresetError.INVALID_PARAMS)
+        val list = parameter.list
+        val multiplier = parameter.multiplier
+        return Response.success(MultiplyEachParams(list.map { it * multiplier }, multiplier), request)
+    }
+}
+```
+
+It is possible to use not only Kotlin Collections but specific classes as a parameter types.
+Note that you don't have to mark the data class with `@Serializable` annotation.
+
+```http request
+POST http://localhost:8080
+Content-Type: application/json
+
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "multiplyEach",
+  "params": {
+    "list": [1, 2, 3],
+    "multiplier": 2
+  }
+}
+```
+```
+HTTP/1.1 200 OK
+Content-Length: 67
+Content-Type: application/json; charset=UTF-8
+Connection: keep-alive
+
+{
+  "result": {
+    "list": [2, 4, 6],
+    "multiplier": 2
+  },
+  "jsonrpc": "2.0",
+  "id": "1"
+}
+```
+
+In the JSON-RPC request, the `params` field of the JSON object should match the structure of the `MultiplyEachParams` class.
+The dispatcher will automatically deserialize the JSON object into an instance of the `MultiplyEachParams` class 
+and pass it to the handle method.
