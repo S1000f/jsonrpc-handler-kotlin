@@ -209,3 +209,8 @@ Connection: keep-alive
 In the JSON-RPC request, the `params` field of the JSON object should match the structure of the `MultiplyEachParams` class.
 The dispatcher will automatically deserialize the JSON object into an instance of the `MultiplyEachParams` class 
 and pass it to the handle method.
+
+## 4. TODO
+- support JSON-RPC 1.0 specification
+- apply kotlinx.serialization
+- support Ktor Plugin
